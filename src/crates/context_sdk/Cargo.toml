@@ -5,10 +5,11 @@ edition = "2021"
 
 [features]
 default = []
-engine_internal = []
+engine_internal = ["phase_space_core", "phase_space_physics"]
 
 [dependencies]
-phase_space_core = { git = "ssh://git@github.com/nilsnark/phase-space-engine", package = "phase_space_core", features = ["engine_internal"] }
+phase_space_core = { git = "ssh://git@github.com/nilsnark/phase-space-engine", optional = true, package = "phase_space_core" }
+phase_space_physics = { git = "ssh://git@github.com/nilsnark/phase-space-engine", optional = true, package = "phase_space_physics" }
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 bytemuck = { version = "1.14", features = ["derive"] }
