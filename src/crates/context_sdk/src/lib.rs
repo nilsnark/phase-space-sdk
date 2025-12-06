@@ -444,88 +444,6 @@ pub mod math {
             }
         }
     }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<phase_space_physics::Vec3> for Vec3 {
-        fn from(value: phase_space_physics::Vec3) -> Self {
-            Self {
-                x: value.x,
-                y: value.y,
-                z: value.z,
-            }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<Vec3> for phase_space_physics::Vec3 {
-        fn from(value: Vec3) -> Self {
-            Self::new(value.x, value.y, value.z)
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<phase_space_physics::Mat3> for Mat3 {
-        fn from(value: phase_space_physics::Mat3) -> Self {
-            Self {
-                rows: [
-                    value.rows[0].into(),
-                    value.rows[1].into(),
-                    value.rows[2].into(),
-                ],
-            }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<Mat3> for phase_space_physics::Mat3 {
-        fn from(value: Mat3) -> Self {
-            Self {
-                rows: [
-                    value.rows[0].into(),
-                    value.rows[1].into(),
-                    value.rows[2].into(),
-                ],
-            }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<phase_space_physics::Mat4> for Mat4 {
-        fn from(value: phase_space_physics::Mat4) -> Self {
-            Self { rows: value.rows }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<Mat4> for phase_space_physics::Mat4 {
-        fn from(value: Mat4) -> Self {
-            Self { rows: value.rows }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<phase_space_physics::Quaternion> for Quaternion {
-        fn from(value: phase_space_physics::Quaternion) -> Self {
-            Self {
-                w: value.w,
-                x: value.x,
-                y: value.y,
-                z: value.z,
-            }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<Quaternion> for phase_space_physics::Quaternion {
-        fn from(value: Quaternion) -> Self {
-            Self {
-                w: value.w,
-                x: value.x,
-                y: value.y,
-                z: value.z,
-            }
-        }
-    }
 }
 
 /// Handles and ticks that can safely cross the plugin boundary.
@@ -562,41 +480,11 @@ pub mod handles {
 
     /// Logical tick counter used for deterministic scheduling.
     pub type Tick = u64;
-
-    #[cfg(feature = "engine_internal")]
-    impl From<phase_space_core::world::EntityId> for EntityId {
-        fn from(id: phase_space_core::world::EntityId) -> Self {
-            Self(id)
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<EntityId> for phase_space_core::world::EntityId {
-        fn from(id: EntityId) -> Self {
-            id.0
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<phase_space_core::time::DimensionId> for DimensionId {
-        fn from(id: phase_space_core::time::DimensionId) -> Self {
-            Self(id.0)
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<DimensionId> for phase_space_core::time::DimensionId {
-        fn from(id: DimensionId) -> Self {
-            phase_space_core::time::DimensionId(id.0)
-        }
-    }
 }
 
 /// Read-only world view exposed to plugins.
 pub mod view {
     use super::handles::{DimensionId, Tick};
-    #[cfg(feature = "engine_internal")]
-    use phase_space_core::WorldView as CoreWorldView;
 
     /// Immutable snapshot of the active dimension state.
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -679,25 +567,11 @@ pub mod view {
             self.dimension_tick()
         }
     }
-
-    #[cfg(feature = "engine_internal")]
-    impl From<CoreWorldView> for WorldViewSnapshot {
-        fn from(view: CoreWorldView) -> Self {
-            WorldViewSnapshot::with_ticks(
-                view.world_seed(),
-                DimensionId::from(view.dimension()),
-                view.engine_tick(),
-                view.dimension_tick(),
-            )
-        }
-    }
 }
 
 /// Intent envelopes that can be queued without exposing the engine world.
 pub mod intent {
     use super::handles::{DimensionId, EntityId, Tick};
-    #[cfg(feature = "engine_internal")]
-    use phase_space_core::intent::CommandEnvelope;
 
     /// Deterministic intent/command envelope.
     #[derive(Debug, Clone, PartialEq, Eq)]
@@ -720,17 +594,6 @@ pub mod intent {
             self.dimension = Some(dimension);
             self
         }
-
-        /// Convert into the core command envelope used by the engine.
-        #[cfg(feature = "engine_internal")]
-        pub fn into_core(self) -> CommandEnvelope<P> {
-            CommandEnvelope {
-                issued_by: self.issued_by.into(),
-                issued_at: self.issued_at,
-                applies_at: self.applies_at,
-                payload: self.payload,
-            }
-        }
     }
 }
 
@@ -742,8 +605,6 @@ pub mod plugin {
     use super::handles::{DimensionId, Tick};
     use super::intent::IntentEnvelope;
     use super::view::WorldView;
-    #[cfg(feature = "engine_internal")]
-    use super::view::WorldViewSnapshot;
 
     /// Narrow plugin trait for external authors.
     pub trait ContextPlugin: Any {
@@ -789,86 +650,11 @@ pub mod plugin {
         /// Engine-specific custom event scoped to a dimension.
         Custom { id: u32, dimension: DimensionId },
     }
-
-    #[cfg(feature = "engine_internal")]
-    mod engine {
-        use super::*;
-        use phase_space_core::{
-            Scheduler as CoreScheduler, World as CoreWorld, WorldView as CoreWorldView,
-        };
-
-        /// Adapter that implements the internal `phase_space_core::ContextPlugin`
-        /// interface for a sanitized plugin implementation.
-        pub struct EngineAdapter<P> {
-            pub(super) plugin: P,
-        }
-
-        impl<P> EngineAdapter<P> {
-            /// Wrap a sanitized plugin.
-            pub fn new(plugin: P) -> Self {
-                Self { plugin }
-            }
-
-            /// Box the adapter as a core plugin object for export.
-            pub fn boxed(self) -> Box<dyn phase_space_core::ContextPlugin + Send>
-            where
-                P: ContextPlugin + Send + 'static,
-                P::Intent: Clone + Send + 'static,
-            {
-                Box::new(self)
-            }
-        }
-
-        impl<P> phase_space_core::ContextPlugin for EngineAdapter<P>
-        where
-            P: ContextPlugin + Send + 'static,
-            P::Intent: Clone + Send + 'static,
-        {
-            fn register_components(&mut self, _world: &mut CoreWorld) {}
-
-            fn register_systems(&mut self, _schedule: &mut CoreScheduler) {}
-
-            fn on_tick(&mut self, _world_view: CoreWorldView) {}
-
-            fn on_tick_with_world(&mut self, world: &mut CoreWorld, core_view: CoreWorldView) {
-                let view = WorldViewSnapshot::from(core_view);
-                let intents = self.plugin.on_tick(&view);
-                for intent in intents {
-                    let dimension = intent.target_dimension(view.dimension()).into();
-                    let envelope = intent.into_core();
-                    if let Err(err) = world.queue_intent(dimension, envelope) {
-                        log::warn!(
-                            "intent from plugin was rejected for dimension {:?}: {:?}",
-                            dimension,
-                            err
-                        );
-                    }
-                }
-            }
-
-            fn as_any(&self) -> &dyn Any {
-                self.plugin.as_any()
-            }
-
-            fn as_any_mut(&mut self) -> &mut dyn Any {
-                self.plugin.as_any_mut()
-            }
-        }
-    }
-
-    #[cfg(feature = "engine_internal")]
-    pub use engine::EngineAdapter;
 }
 
-/// FFI-friendly ABI types shared with WASM plugins.
-#[cfg(feature = "engine_internal")]
-pub mod abi {
-    pub use phase_space_core::plugin_abi::*;
-}
-
-/// FFI-friendly ABI types shared with WASM plugins when building outside the
-/// engine workspace. These mirror the layouts defined in `phase_space_core`.
-#[cfg(not(feature = "engine_internal"))]
+/// FFI-friendly ABI types shared with WASM plugins. These mirror the layouts
+/// defined in the engine's `plugin_abi` module without requiring engine
+/// dependencies.
 pub mod abi {
     use bytemuck::{Pod, Zeroable};
 
@@ -1120,11 +906,5 @@ pub mod guest {
 
 pub use handles::{DimensionId, EntityId, Tick};
 pub use intent::IntentEnvelope;
-#[cfg(feature = "engine_internal")]
-pub use phase_space_core::engine_rand_u64;
-#[cfg(feature = "engine_internal")]
-pub use phase_space_core::intent::IntentQueueError;
-#[cfg(feature = "engine_internal")]
-pub use plugin::EngineAdapter;
 pub use plugin::{ContextEvent, ContextPlugin};
 pub use view::{WorldView, WorldViewSnapshot};

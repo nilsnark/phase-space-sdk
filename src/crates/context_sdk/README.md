@@ -7,8 +7,8 @@ internals. First-party code and engine tests should depend on
 `phase_space_core::context_sdk` directly for the full surface area.
 
 Plugins can implement `plugin::ContextPlugin` and, when building inside the
-engine workspace, wrap it with `plugin::EngineAdapter` by enabling the
-`engine_internal` cargo feature. See
+engine workspace, wrap it with `phase_space_context_sdk_internal::plugin::EngineAdapter`.
+See
 [`docs/engine/context-plugin-sdk.md`](../../docs/engine/context-plugin-sdk.md)
 for authoring guidance, ABI details, and examples.
 
