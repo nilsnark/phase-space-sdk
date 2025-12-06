@@ -1,5 +1,5 @@
 [package]
-name = "phase_space_context_sdk"
+name = "phase_space_sdk"
 version = "0.1.0"
 edition = "2021"
 

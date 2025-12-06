@@ -5,4 +5,4 @@ members = [ "crates/context_sdk" ]
 resolver = "2"
 
 [workspace.dependencies]
-phase_space_context_sdk = { version = "0.1.0", path = "crates/context_sdk" }
+phase_space_sdk = { version = "0.1.0", path = "crates/context_sdk" }
