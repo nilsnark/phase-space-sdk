@@ -1,8 +1,8 @@
 [workspace]
-members = [ "crates/context_sdk" ]
+members = [ "src/crates/context_sdk" ]
 
 # Use the V2 resolver so that features and dependencies are handled consistently
 resolver = "2"
 
 [workspace.dependencies]
-phase_space_sdk = { version = "0.1.0", path = "crates/context_sdk" }
+phase_space_sdk = { version = "0.1.0", path = "src/crates/context_sdk" }
