@@ -7,6 +7,7 @@ use crate::determinism::ScriptRngState;
 use crate::world::{MassDto, TransformDto, VelocityDto};
 use crate::determinism::WorldSeed;
 use crate::script::SelfView as ScriptSelfView;
+use std::collections::HashMap;
 use std::any::Any;
 
 /// Declarative phase ordering for system execution within a dimension tick.
@@ -23,6 +24,80 @@ pub enum TickPhase {
 /// Stable identifier for a system within a phase.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SystemId(pub u64);
+
+/// Explicit ordering of phases to execute for each dimension tick.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PhaseOrder(pub Vec<TickPhase>);
+
+impl PhaseOrder {
+    pub fn new(phases: Vec<TickPhase>) -> Self {
+        let mut seen = HashMap::new();
+        let mut ordered = Vec::with_capacity(phases.len());
+
+        for phase in phases {
+            if seen.insert(phase, ()).is_none() {
+                ordered.push(phase);
+            }
+        }
+
+        PhaseOrder(ordered)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = TickPhase> + '_ {
+        self.0.iter().copied()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
+impl Default for PhaseOrder {
+    fn default() -> Self {
+        PhaseOrder::new(vec![
+            TickPhase::Physics,
+            TickPhase::Sensors,
+            TickPhase::Scripts,
+            TickPhase::IntentCommit,
+        ])
+    }
+}
+
+/// Declarative scheduling profile for a dimension type.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DimensionProfile {
+    pub phase_order: PhaseOrder,
+    systems_by_phase: HashMap<TickPhase, Vec<SystemId>>,
+}
+
+impl DimensionProfile {
+    pub fn new(phase_order: PhaseOrder) -> Self {
+        Self {
+            phase_order,
+            systems_by_phase: HashMap::new(),
+        }
+    }
+
+    pub fn register_system(&mut self, phase: TickPhase, system_id: SystemId) {
+        self.systems_by_phase
+            .entry(phase)
+            .or_default()
+            .push(system_id);
+    }
+
+    pub fn systems_for_phase(&self, phase: TickPhase) -> &[SystemId] {
+        self.systems_by_phase
+            .get(&phase)
+            .map(Vec::as_slice)
+            .unwrap_or(&[])
+    }
+}
+
+impl Default for DimensionProfile {
+    fn default() -> Self {
+        Self::new(PhaseOrder::default())
+    }
+}
 
 /// Execution context supplied to systems each tick.
 #[derive(Clone, Debug, PartialEq)]

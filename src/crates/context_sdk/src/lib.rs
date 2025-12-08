@@ -453,6 +453,9 @@ pub mod world {
     use super::math::{Quaternion, Vec3};
     use super::sensors::{ScanRequest, SensorDef, SensorState};
 
+    /// Canonical interstellar physics profile identifier used by the engine.
+    pub const CORE_PHYSICS_PROFILE_INTERSTELLAR: &str = "core.physics.interstellar.default";
+
     /// Basic transform DTO.
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct TransformDto {
@@ -1819,7 +1822,7 @@ pub use sensors::{
 pub use view::{WorldView, WorldViewSnapshot};
 pub use world::{
     DimensionTag, EngineDto, FrameRef, InertiaTensorDto, MassPropertiesDto, PhaseKinematicsDto,
-    TransformDto, VelocityDto, WorldBuilder,
+    TransformDto, VelocityDto, WorldBuilder, CORE_PHYSICS_PROFILE_INTERSTELLAR,
 };
 
 pub mod runtime;
