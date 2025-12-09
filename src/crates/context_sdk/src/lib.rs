@@ -1815,6 +1815,10 @@ pub use script::{
     ScriptId, ScriptResult, ScriptRuntime, SelfView as ScriptSelfView,
 };
 pub use runtime::*;
+pub use runtime::{
+    DimensionClock, DimensionSchedule, EngineClock, PhaseHashMode, Scheduler as SdkScheduler,
+    SimulationLoop, SimulationScheduler, SimDuration, TickSchedule,
+};
 pub use sensors::{
     BandId, IdealObservation, Observation, ObservationKind, ObservationMeta, Resolution,
     ScanRequest, SensorDef, SensorId, SensorState, SensorSystem, SensorWorld, Target,
