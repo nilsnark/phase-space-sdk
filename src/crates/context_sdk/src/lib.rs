@@ -1810,14 +1810,14 @@ pub use determinism::{engine_rand_f64, engine_rand_u64, RngDomain, ScriptRngStat
 pub use handles::{DimensionId, EntityId, Tick};
 pub use intent::IntentEnvelope;
 pub use plugin::{ContextEvent, ContextPlugin};
-pub use script::{
-    BrainRef as ScriptBrainRef, Mailbox as ScriptMailbox, ScriptContextBuilder, ScriptError,
-    ScriptId, ScriptResult, ScriptRuntime, SelfView as ScriptSelfView,
-};
 pub use runtime::*;
 pub use runtime::{
     DimensionClock, DimensionSchedule, EngineClock, PhaseHashMode, Scheduler as SdkScheduler,
-    SimulationLoop, SimulationScheduler, SimDuration, TickSchedule,
+    SimDuration, SimulationLoop, SimulationScheduler, TickSchedule,
+};
+pub use script::{
+    BrainRef, Mailbox, ScriptContextBuilder, ScriptError, ScriptId, ScriptResult, ScriptRuntime,
+    SelfView,
 };
 pub use sensors::{
     BandId, IdealObservation, Observation, ObservationKind, ObservationMeta, Resolution,
@@ -1833,6 +1833,12 @@ pub use world::{
 pub mod runtime;
 
 /// Scripting utilities and DTOs surfaced to contexts without exposing engine internals.
+///
+/// All scripting types are re-exported at the crate root so adapters can import them directly:
+///
+/// ```
+/// use phase_space_context_sdk::{BrainRef, Mailbox, ScriptId, ScriptRuntime, SelfView};
+/// ```
 pub mod script {
     use crate::context::{Actor, BrainId, BrainState, DeterministicContextBlob};
     use crate::handles::{DimensionId, EntityId};
@@ -1849,7 +1855,10 @@ pub mod script {
     }
 
     impl Mailbox {
-        pub fn new(inbox: Vec<DeterministicContextBlob>, outbox: Vec<DeterministicContextBlob>) -> Self {
+        pub fn new(
+            inbox: Vec<DeterministicContextBlob>,
+            outbox: Vec<DeterministicContextBlob>,
+        ) -> Self {
             Self { inbox, outbox }
         }
     }
