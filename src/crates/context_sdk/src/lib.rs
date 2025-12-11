@@ -1825,8 +1825,9 @@ pub use sensors::{
 };
 pub use view::{WorldView, WorldViewSnapshot};
 pub use world::{
-    DimensionTag, EngineDto, FrameRef, InertiaTensorDto, MassPropertiesDto, PhaseKinematicsDto,
-    TransformDto, VelocityDto, WorldBuilder, CORE_PHYSICS_PROFILE_INTERSTELLAR,
+    DimensionTag, EngineDto, FrameRef, FuelTankDto, InertiaTensorDto, ManeuverNodeDto, MassDto,
+    MassPropertiesDto, PhaseKinematicsDto, TransformDto, VelocityDto, WorldBuilder,
+    CORE_PHYSICS_PROFILE_INTERSTELLAR,
 };
 
 pub mod runtime;
